@@ -1,0 +1,58 @@
+#=========================
+# MTP initial config
+# Needed only once every time a new card is plugged in
+cd
+./start_diag.sh
+source .bash_profile
+
+#=========================
+# start tclsh
+cd ~/diag/asic/asic_src/ip/cosim/tclsh
+tclsh
+source .tclrc.diag
+set slot 10
+diag_open_j2c_if 10 $slot
+
+#=========================
+# Enter uboot
+# terminal 1
+con_connect.sh <slot>
+
+# terminal 2
+turn_on_slot.sh off <slot>
+turn_on_slot.sh on <slot>
+
+# terminal 1
+CTRL+C
+
+#=========================
+# Program SW on NIC
+# Copy image to MTP
+
+# Configure management port
+# Boot NIC to goldfw
+# On NIC console
+# Rule of IP: 10.1.1.<100+slot>
+ifconfig oob_mnic0 10.1.1.108 netmask 255.255.255.0
+# Make sure it is pingable
+ping 10.1.1.100
+
+#==================================
+# Install fw image
+cd /update
+# Copy iamge from MTP to NIC
+
+# mainfwa
+fwupdate -p image.tar -i mainfwa
+
+# mainfwb
+fwupdate -p image.tar -i mainfwb
+
+# diagfw
+fwupdate -p image.tar -i diagfw
+
+#==================================
+# Mount emmc
+mount /dev/mmcblk0p10 /data
+
+

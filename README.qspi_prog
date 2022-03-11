@@ -1,0 +1,246 @@
+#====================
+Host server: 192.168.71.109
+APC: 192.168.68.14 P9
+Login: root/lab123
+
+J2C Server: 192.168.69.142
+APC: 192.168.70.141 P14
+Longin: diag/lab123
+
+Console cap-ts1 2006
+
+APC login: apc/apc
+
+#==========================================
+# QSPI programming
+
+#--------------------
+# Make sure host server is up
+
+#--------------------
+# J2C server
+
+# Set up tcl environment
+# cp /vol/hw/diag/xin/nic/ to your own folder
+cd nic
+export ASIC_LIB_BUNDLE=`pwd`
+export ASIC_SRC=$ASIC_LIB_BUNDLE/asic_src
+cd $ASIC_LIB_BUNDLE/asic_lib
+source source_env_path
+export LD_LIBRARY_PATH=$ASIC_LIB_BUNDLE/depend_libs/mtp_hack:$LD_LIBRARY_PATH
+cd $ASIC_LIB_BUNDLE/depend_libs/mtp_hack
+rm -f *
+ln -s $ASIC_LIB_BUNDLE/depend_libs/lib64/libJudy.so.1 $ASIC_LIB_BUNDLE/depend_libs/mtp_hack
+ln -s $ASIC_LIB_BUNDLE/depend_libs/lib64/libtcl8.5.so $ASIC_LIB_BUNDLE/depend_libs/mtp_hack
+ln -s $ASIC_LIB_BUNDLE/depend_libs/lib64/libgmpxx.so.4 $ASIC_LIB_BUNDLE/depend_libs/mtp_hack
+ln -s $ASIC_LIB_BUNDLE/depend_libs/lib64/libcrypto.so.10 $ASIC_LIB_BUNDLE/depend_libs/mtp_hack
+ln -s $ASIC_LIB_BUNDLE/depend_libs/lib64/libpcap.so.1 $ASIC_LIB_BUNDLE/depend_libs/mtp_hack
+
+# Put ARM to reset
+cd $ASIC_SRC/ip/cosim/tclsh
+tclsh
+source .tclrc.diag.elb
+
+# Ortano
+diag_open_j2c_if 0x14 0x10
+# make sure this command return 0x00000001
+_msrd
+
+# Ortano
+elb_card_rst 0x14 0x10 hod 3000 3200 0 0 "127" 0 1 normal 0 0
+# Pomonte
+elb_card_rst 0x14 0x10 nod 3200 2000 0 0 "127" 0 1 normal 0 0
+# Lacona
+elb_card_rst 0x14 0x10 nod_550 3200 2000 0 0 "127" 0 1 normal 0 0
+
+exit
+
+# Configure NIC PCIe on host server via J2C 
+# first time, we need to ssh from j2c machine to host
+$ASIC_SRC/ip/cosim/elba/pcie/bringup_host_using_j2c.bash $ASIC_LIB_BUNDLE 192.168.75.151 lab123 0x14 0x10 qspi
+
+#--------------------
+# On host server
+
+# Log in to host server with root/lab123
+cd kinjal/pciflash/
+./load_first_article.bash first_article_img.bin.0604.a
+
+# QSPI programming take about 25 min
+
+#==========================================
+# Lacona cofiguration
+
+#--------------------
+# pSLC mode
+
+# Use APC to power cycle host server
+# Card should boot to diagfw
+
+# on NIC console
+
+mmc enh_area set -y 0 30998528 /dev/mmcblk0
+mmc enh_area set -y 0 30998528 /dev/mmcblk0
+
+# Use APC to power cycle host server
+# Log in to diagfw
+
+fwupdate --init-emmc
+fdisk -l
+
+# fdisk -l should have following output
+Found valid GPT with protective MBR; using GPT
+
+Disk /dev/mmcblk0: 61997056 sectors, 1600M
+Logical sector size: 512
+Disk identifier (GUID): ea17bb2f-bc9b-4957-b244-79c455527913
+Partition table holds up to 128 entries
+First usable sector is 34, last usable sector is 61997022
+
+Number  Start (sector)    End (sector)  Size Name
+     1            2048           67583 32.0M Kernel Image A
+     2           67584          133119 32.0M Kernel Image B
+     3          133120         2230271 1024M System Image A
+     4         2230272         4327423 1024M System Image B
+     5         4327424         6424575 1024M Update Filesystem
+     6         6424576         6457343 16.0M Config0 Filesystem
+     7         6457344         6490111 16.0M Config1 Filesystem
+     8         6490112         7014399  256M OBFL Filesystem
+     9         7014400         7276543  128M Reserved
+    10         7276544        61997022 26.0G Data Filesystem
+
+#--------------------
+# ARM FRU Programming
+
+mount /dev/mmcblk0p10 /data/
+cd /data/
+
+# Create fru.json.bak with the same content as following file 
+/vol/hw/diag/xin/nic/fru.json
+
+cp /data/fru.json.bak /tmp/fru.json
+#cd /nic/conf/iris/i
+#cp -a 8g/ 16g
+sysinit.sh classic hw diag
+
+# Wait for 30-60 sec till all network interfaces shows up including oob_mnic0 and int_mnic0
+
+# On host server
+reboot
+
+# After host server boots up, log in
+ifconfig enp37s0 169.254.37.2/24 up
+scp /home/diag/xin/eeutil root@169.254.37.1:/data/
+
+# on NIC console
+cd /data/
+export CARD_TYPE="LACONADELL"
+#./eeutil -update -sn="FLM21190020" -pn="68-0020-01 03" -mac="00AECDF614B0" -erase -numBytes=512
+./eeutil -update -sn=<SN> -pn="68-0020-01 03" -mac=<MAC> -erase -numBytes=512
+./eeutil -disp
+
+#--------------------
+# PCIe FRU programming
+# Put NIC to MTP and load latest amd64 image
+#eeutil -update -sn="FLM21190020" -pn="68-0020-01 03" -mac="00AECDF614B0" -erase -numBytes=512 -uut=uut_10
+eeutil -update -sn=<SN> -pn="68-0020-01 03" -mac=<MAC> -erase -numBytes=512 -uut=<UUT>
+
+#==========================================
+# Enable TCP/IP over PCIe
+
+# Power cycle host server
+# Wait host server boots up
+# Make sure ionic driver is installed.
+#
+# On NIC console
+
+mount /dev/mmcblk0p10 /data/
+cd /data/
+
+sysinit.sh classic hw diag
+
+# Wait for 30-60 sec till all network interfaces shows up including oob_mnic0 and int_mnic0
+
+# On host server
+reboot
+
+#--------------------
+# After host server boots up, log in
+
+lspci -d 1dd8:
+
+ifconfig enp37s0 169.254.37.2/24 up
+scp /home/diag/xin/eeutil root@169.254.37.1:/data/
+
+#==========================================
+# Configure to HPE
+# Keep Dell FPGA/FRU
+
+# Program image
+~xguo2/workspace/platform-image/lacona_image_2021.05.27/0k_hpe/diagfw/naples_diagfw_0629.tar
+~xguo2/workspace/platform-image/lacona_image_2021.05.27/0k_hpe/naples_goldfw.tar
+
+#--------------------
+# Program FRU
+Convert Pensando SN to HPE:
+Replace FLM2 with 5UP
+Example: FLM21190027 => 5UP1190027
+
+# Copy new eeutil to host, then to NIC
+~xguo2/workspace/psdiag1/diag/app/src/util/eeutil/arch_arm64/eeutil
+
+# Before copy eeutil to NIC, mount emmc
+mount /dev/mmcblk0p10 /data/
+
+# on host
+scp eeutil root@169.254.37.1:/data/
+
+# To program
+export CARD_TYPE="LACONA"
+#./eeutil -update -sn="FLM21190020" -pn="68-0020-01 03" -mac="00AECDF614B0" -erase -numBytes=512
+./eeutil -update -sn=<SN> -pn="P47927-001" -mac=<MAC> -erase -numBytes=512
+./eeutil -disp
+
+# Program HPE FPGA and put to MTP
+
+# Copy new eeutil to MTP
+~xguo2/workspace/psdiag1/diag/app/src/util/eeutil/arch_amd64/eeutil
+
+# To program
+slot=<>
+export UUT_$slot="LACONA"
+./eeutil -update -sn=<SN> -pn="P47927-001" -mac=<MAC> -erase -numBytes=512 -uut=uut_$slot
+./eeutil -disp -uut=uut_$slot
+
+# Set to goldfw
+
+#==========================================
+# VMWare image Installation
+# Keep Dell FPGA/FRU
+
+~xguo2/workspace/platform-image/lacona_image_2021.05.27/0m_vmware/elba_esxio.tar
+
+This needs to be installed from goldfw, so boot to goldfw and copy the file over from the x86 (Dhruval can describe how) and then:
+# fwupdate -p elba_esxio.tar -i all
+ ===> Found custom package installer; launching...
+ ===> Checking package
+ mmcblk0p1.gz... OK
+ naples_goldfw.tar... OK
+ uboota.img... OK
+ ubootenv.gz... OK
+ uefi.dtb... OK
+ ###
+ ### WARNING: This will replace the Pensando Linux install with
+ ###          an Engineering (non-functioning) ESXio install
+ ###
+ Install (y/n)? [n] y
+ ... installation continues
+
+#==========================================
+# Find host ethernet interface
+root@fst:~# lspci -d :1004
+0c:00.0 Ethernet controller: Device 1dd8:1004
+
+root@fst:~# dmesg | grep "1 Gbps"
+[    9.688002] ixgbe 0000:04:00.0 enp4s0f0: NIC Link is Up 1 Gbps, Flow Control: RX/TX
+[  435.902512] ionic 0000:0c:00.0 enp12s0: Link up - 1 Gbps

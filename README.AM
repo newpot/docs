@@ -1,0 +1,23 @@
+# Need following only once after card is inserted
+cd
+./start_diag.sh
+source .bash_profile
+
+# Copy files to nic
+cd diag/python/regression
+slot=10
+./nic_test.py -setup_multi -slot_list $slot -mgmt
+
+scp_s.sh <image_name> $slot /data/
+
+# Install mainfw
+con_connect.sh $slot
+cd /data
+
+fwupdate -r
+# if above command shows mainfwa, you can install mainfwb and vice versa
+fwupdate -p <image_name> -i mainfwa/mainfwb
+
+# Choose to boot to installed image
+fwupdate -s mainfwa/mainfwb
+

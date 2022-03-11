@@ -1,0 +1,21 @@
+# Enable DDR training
+sknobs_set_value elb0/mc/use_hardcoded_training 0
+
+# To run training on DDR:
+run_ddr1 3200
+mc_init_start
+mc_init_done
+# To check which slice failed after training
+# (0 if using lacona)
+ddr_train_chk 3
+
+DQ[0-7]: slice 0 (CH0: U5_1,   CH1: U17_1)
+DQ[8-15]:slice 1(CH0: U6_1,   CH1: U18_1)
+DQ[16-23]: slice 2(CH0: U7_1, CH1: U19_1)
+DQ[24-31]:slice 3 (CH0: U8_1, CH1: U20_1)
+DQ[32-39]: slice 4 (CH0: U9_1, CH1: U21_1)
+DQ[40-47]: slice 5 (CH0: U10_1, CH1: U22_1)
+DQ[48-55]: slice 6 (CH0: U11_1, CH1: U23_1)
+DQ[56-63]: slice 7 (CH0: U15_1, CH1: U24_1)
+DQ[64-71]: slice 8 (CH0: U16_1, CH1: U25_1)
+

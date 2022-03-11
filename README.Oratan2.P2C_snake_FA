@@ -1,0 +1,20 @@
+find . -name *tar.gz | awk -F "/" '{print "tar -zxf " $0 " -C ./" $2}'
+
+find . -name mtp_test.log | xargs grep "NIC_DIAG_REGRESSION_TEST_"
+
+cat tee o2_snake_p2c_fa.txt | grep FAIL | awk -F " " '{print $1 " " $2}' | sort -t ' ' -k1,1 -k2,2 | uniq -c
+
+log_root="/mfg_log/"
+find $log_root -name *tar.gz | awk -F "/" '{print $NF}' | sort | uniq | awk -F "_" '{print $1 " " $2}' | tee mtp_usage.txt
+
+cat mtp_usage.txt | awk '$1>400'
+
+# untar files found by find command in the dir where it is loacted
+find ./ -name '*.tar.gz' -exec sh -c 'dir=$(dirname "$0"); tar -xf "${0}" -C "${dir}"; done' {} \;
+
+sn=FPN2129003C
+grep $sn mtp_test.log | grep NIC_DIAG_REGRESSION_TEST
+grep -B30 TIMEOUT mtp_diag.log
+
+find . -name mtp_test.log | xargs grep $sn | grep NIC_DIAG_REGRESSION_TEST
+find . -name mtp_diag.log | xargs grep -B30 TIMEOUT

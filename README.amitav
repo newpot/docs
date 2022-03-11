@@ -1,0 +1,143 @@
+#==============================
+# Using MTP
+cd
+./start_diag.sh
+source .bash_profile
+# Display fru content of slot 1
+eeutil -disp -uut=uut_1
+# SN/PN/MAC
+
+# update - Be careful to run it
+eeutil -erase -numBytes=256 -uut=uut_1
+eeutil -update -sn=FPN20370043 -pn="68-0014-01 03" -mac="00AECD097DA0" -uut=uut_1
+
+# To try and understand
+cd 
+cd diag/python/regression/
+./nic_test.py -setup_multi -slot_lit 1
+# or this command to setup management port
+./nic_test.py -setup_multi -slot_lit 1 -mgmt
+
+# connect NIC console
+con_connect.sh <slot>
+
+# ssh to NIC
+ssh_s.sh <slot>
+
+# ARM login
+root/pen123
+
+# on ARM linux
+cd /data/nic_util/
+./eeutil -disp
+
+# To quit nic console
+CTRL+A CTRL+x
+
+# power cycle cards
+slots=8
+# or
+slots=8,9
+# or
+slots=all
+
+turn_on_slot.sh off <slots>
+turn_on_slot.sh on <slots>
+
+#==============================
+# 04/13/2021
+
+# Inventory display detailed card type
+
+diag@MTP:~/arm_image$ inventory -present
+[INFO]    [2021-04-13-15:26:50.985] UUT_1                   UUT_NONE
+[INFO]    [2021-04-13-15:26:50.99 ] UUT_2                   UUT_NONE
+[INFO]    [2021-04-13-15:26:50.993] UUT_3                   UUT_NONE
+[INFO]    [2021-04-13-15:26:50.995] UUT_4                   UUT_NONE
+[INFO]    [2021-04-13-15:26:50.997] UUT_5                   ORTANO2     <= ORTANO2_ORACLE
+[INFO]    [2021-04-13-15:26:50.999] UUT_6                   ORTANO2     <= ORTANO2_PEN
+[INFO]    [2021-04-13-15:26:51.001] UUT_7                   UUT_NONE
+[INFO]    [2021-04-13-15:26:51.003] UUT_8                   UUT_NONE
+[INFO]    [2021-04-13-15:26:51.006] UUT_9                   UUT_NONE
+[INFO]    [2021-04-13-15:26:51.008] UUT_10                  UUT_NONE
+
+-------------------------------
+Inventory path
+diag/app/src/util/inventory
+
+-------------------------------
+Part number table
+https://docs.google.com/spreadsheets/d/1PMcJwjrvGzljaFt6W6of9N9Grn_qsqx8OreS_9SFqr0/edit?usp=sharing
+
+-------------------------------
+MTP IP: Naples MTP
+192.168.70.151
+
+diag@MTP:~/diag/python/esec$ env | grep MTP
+MTP_REV=REV_04
+CARD_NAME=MTP1
+CARD_TYPE=MTP
+UUT_TYPE=NAPLES_MTP
+MTP_TYPE=MTP_CAPRI
+
+#==============================
+# 04/02/2021
+1. FPGA util: r/w register, image program/reload/dump
+    a. Reivew FPGA doc
+2. Marvel PHY, MDIO interface FPGA
+3. Diag hw component check list
+4. FRU table is not ready yet.
+
+#==============================
+# 02/23/2021
+
+# I2C commands
+i2cget
+i2cset
+i2cdetect
+
+# eeprom
+diag/app/src/device/eeprom/eeprom.go
+
+# I2C talbes
+diag/app/src/hardware/i2cinfo/i2cinfo.go
+
+#----------------------------
+# Data Sheet - Google drive
+https://docs.google.com/spreadsheets/d/1wpj-M_HwsbF6Dp8ixWmeAn9esIfnjSQn95Xs2N9kRps/edit?usp=sharing
+
+# Lacona
+# Spec
+https://docs.google.com/document/d/1UK9LdfJ3WmcBT-Idh941e9PFiSWJkg6cMffpE45Tp9s/edit?usp=sharing
+
+# Review Lacona schematics
+# HW engineer: Andrew Ha
+# mount /vol/hw/ to Windows
+/vol/hw/HW_Design/Schematics_PDF/Lacona/
+# Understand hardware components. List components to be tested with diag
+https://docs.google.com/spreadsheets/d/1F-j6-8MSKlkgqHAdKxggiQul9qGJwcpJti3gpQR1RT8/edit?usp=sharing
+
+# FPGA util
+# Xilinx FPGA ?? Get FPGA spec from Andy Teng or Xilinx FAE: XC7A75T-1FGG484Q
+# Need a util to read/write registers, update FPGA image. 
+
+#==============================
+# Schematics path
+# Need to mount /vol/hw/ to Windows
+/vol/hw/HW_Design/Schematics_PDF/
+
+# FRU util
+diag/app/src/util/eeutil/
+
+# FRU device module
+diag/app/src/device/eeprom/
+
+# FRU definition
+# Google drive
+Pensando/HW/HW Specs/Pensando FRU.xlsx
+
+# Ortano Spec
+Pensando/HW/HW Specs/Ortano-Oracle...
+
+# Lacona Spec
+Pensando/HW/HW Specs/Lacona

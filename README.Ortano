@@ -1,0 +1,16 @@
+slot=5
+turn_on_slot.sh off $slot; turn_on_slot.sh on $slot; i2cset -y 0 0x4a 0x21 0x15
+sleep 1
+i2cset -y 0 0x4a 0x21 0x5
+
+# L1
+set slot 5
+diag_open_j2c_if 10 $slot
+_msrd
+set volt_mode "nod"
+set ddr_freq 1600
+set arm_freq 2000
+set run_snake 0
+elb_card_rst 10 5 $volt_mode $ddr_freq $arm_freq
+elb_l1_screen_diag slot_$slot 10 $slot $volt_mode 0 0 "" 0 1 $run_snake 0 1 $arm_freq $ddr_freq
+diag_close_j2c_if 10 $slot

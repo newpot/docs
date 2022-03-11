@@ -1,0 +1,8 @@
+set sbus "1:21"
+elb_aapl_cmd_line "eye -addr $sbus -min-dwell 1e6 -max-dwell 1e8 -x-res 64 -y-points 512 -print-vbtc -print-hbtc"
+elb_aapl_cmd_line "eye -addr 1:21 -min-dwell 1e6 -max-dwell 1e8 -x-res 64 -y-points 512 -print-vbtc -print-hbtc -print-ascii-eye"
+elb_aapl_cmd_line "eye -addr 1:21 -min-dwell 1e6 -max-dwell 1e8 -x-res 64 -y-points 512 -print-ascii-eye"
+elb_aapl_cmd_line "eye -addr 1:29 -min-dwell 1e6 -max-dwell 1e8 -x-res 64 -y-points 512 -print-ascii-eye"
+
+elb_aapl_cmd_line "serdes-init -lane-init -osr osx1 -elb -auto-polarity -encoding 4 -force -width-mode 80 -tx-eq-num-tap 6 -media-type 1 -pre2 0 -pre -16 -atten 144 -post 0 -post2 0 -post3 0 -a 1:21"
+elb_aapl_cmd_line "serdes-init -lane-init -pre -16 -atten 144 -post 0 -a 1:21"

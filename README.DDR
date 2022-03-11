@@ -1,0 +1,71 @@
+Practical Elba DDR Address Map
+------------------------------
+1f_ffffffff +------------------+
+            |                  |
+            :    Upper DDR     : 56GB       37-bit address
+            |                  |
+12_00000000 +------------------+
+            :     reserved     :
+10_80000000 +------------------+
+            |      Mid DDR     | 2GB        37-bit address
+10_00000000 +------------------+
+            :                  :
+            :     reserved     :
+            :                  :
+01_ffffffff +------------------+
+            |     High DDR     | 4GB        33-bit address
+01_00000000 +------------------+
+            |      Low DDR     | 2GB        32-bit address
+00_80000000 +------------------+
+New
+12:08
+DDR Alias:
+
+10_00000000 +------------------+ +------------------+ 20_00000000
+            |//////////////////| |                  |
+            |//////////////////| |                  |
+            |//////////////////| |                  |
+            ://////////////////: :       DDR        :
+            |//////////////////| |                  |
+            |//////////////////| |                  |
+            |//////////////////| |                  |
+02_00000000 +------------------+ +------------------+ 12_00000000
+            |                  | |                  |
+            :        DDR       : :      Alias       :
+            |                  | |                  |
+00_80000000 +------------------+ +------------------+ 10_80000000
+            |//////////////////| |       DDR        |
+00_00000000 +------------------+ +------------------+ 10_00000000
+                     (a)                 (b)
+
+(a) The 64GB physical address region from 0-64GB exposes 6GB of DDR from
+    00_80000000..01_ffffffff.
+
+(b) The 64GB physical address region from 64GB-128GB exposes the full DDR
+    range from 10_00000000.
+
+The DDR range in (a) is an alias of full range, needed in order to provide
+some 32-bit adddressable memory for Linux, and 33-bit addressable memory
+for table-constrained datapath code.
+
+=========================================
+[ 0]: 0080000000...00bfffffff  1.00GiB LINUX NS CC ---
+[ 1]: 00c0000000...00c3ffffff  0.06GiB DP    NS CC ---
+[ 2]: 00c4000000...01ffffffff  4.93GiB DP    NS NC ---
+[ 3]: 1000000000...107fffffff  2.00GiB DP    NS NC BYP
+[ 4]: 1200000000...123fffffff  1.00GiB DP    NS NC ---
+[ 5]: 1240000000...17ffffffff 23.00GiB LINUX NS CC ---
+
+DSC# help ddrscan
+ddrscan - Scan DDR memory
+
+Usage:
+ddrscan [-s START] [-e END] [-S STRIDE] [-p PATTER(addr|rnd)]
+     NOTE: Addresses are DDR physical (not ARM mapped)
+     START default 0, END default DDR size, STRIDE default 8m
+     For PATTERN addr (default), the data written to memory is the
+     same as the memory address (for finding aliases)
+     For PATTERN rnd, the data written to memory is pseudorandom
+e.g. ddrscan -s 2g -e 4g -S 1k
+     ddrscan -s 2g -e 4g -p rnd
+~dac2/amui/ubootg.img-092821

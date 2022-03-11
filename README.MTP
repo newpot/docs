@@ -1,0 +1,7 @@
+# Do it only once every time cards are inserted or removed to/out of MTP
+cd
+./start_diag.sh
+source .bash_profile
+
+# To use MTP console to NIC
+con_connect.sh <slot>

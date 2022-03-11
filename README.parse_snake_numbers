@@ -1,0 +1,110 @@
+cd /home/gakis/dwang_4ch.03012022/
+./parse_snake_elba.csh FPN22070F12
+
+./parse_snake_elba.csh . > parse.txt
+% head -1 parse.txt | awk ‘{for (i=1;i<=NF;i++)print i”= “$i}’
+1= .
+2= FPN220710A5
+3= 4C-H_MTP-726_2022-02-24_14-49-02
+4= hv_asic_logs
+5= FPN220710A5_snake_elba.log
+6= FREQ
+7= 1033
+8= TEMP
+9= 82.250
+10= STAT
+11= PASSED
+12= CARD_DETAILS
+13= ORTANO2
+14= TOT_PWR
+15= 78.2
+16= W
+17= ASIC_PWR
+18= 45.1
+19= W
+20= 29.7
+21= 10.5
+22= 4.9
+23= VOLTAGE
+24= 0.740
+25= 0.870
+26= AVS
+27= 11
+28= 5
+29= TEMP
+30= 68.7
+31= 46.0
+32= 80.0
+33= PMRO
+34= 1221
+35= DIE_ID
+36= 0x35B46458445431642E7095
+% sort -n -k 9 parse.txt | tail|sed ‘s/CARD_DETAILS.*//’
+.  FPN22080151  4C-H_MTP-777_2022-02-25_20-02-45  hv_asic_logs  FPN22080151_snake_elba.log  FREQ  1100  TEMP  114.750  STAT  FAILED
+.  FPN22080166  4C-H_MTP-752_2022-02-26_21-47-54  hv_asic_logs  FPN22070F56_snake_elba.log  FREQ  1100  TEMP  114.750  STAT  PASSED
+.  FPN220801F9  4C-H_MTP-757_2022-02-25_15-59-48  hv_asic_logs  FPN2208026F_snake_elba.log  FREQ  1100  TEMP  114.750  STAT  FAILED
+.  FPN22080263  4C-H_MTP-786_2022-02-25_05-55-04  hv_asic_logs  FPN22070F31_snake_elba.log  FREQ  1100  TEMP  114.750  STAT  PASSED
+.  FPN22080264  4C-H_MTP-812_2022-02-25_07-12-40  hv_asic_logs  FPN22080215_snake_elba.log  FREQ  1100  TEMP  114.750  STAT  PASSED
+.  FPN22080377  4C-H_MTP-733_2022-02-27_19-34-13  hv_asic_logs  FPN2208036C_snake_elba.log  FREQ  1100  TEMP  114.750  STAT  PASSED
+.  FPN22080533  4C-H_MTP-676_2022-02-27_19-19-11  hv_asic_logs  FPN22080174_snake_elba.log  FREQ  1100  TEMP  114.750  STAT  PASSED
+.  FPN22070E85  4C-H_MTP-769_2022-02-25_19-25-00  lv_asic_logs  FPN22070EDD_snake_elba.log  FREQ  1100  TEMP  115.000  STAT  PASSED
+.  FPN22070E97  4C-H_MTP-780_2022-02-25_19-17-51  hv_asic_logs  FPN22070F73_snake_elba.log  FREQ  1100  TEMP  115.000  STAT  PASSED
+.  FPN22070F04  4C-H_MTP-637_2022-02-25_19-31-34  hv_asic_logs  FPN22070F78_snake_elba.log  FREQ  1100  TEMP  115.000  STAT  PASSED
+2:39
+% sort -n -k 9 parse.txt | tail -20 | sed ‘s/ASIC_PWR.*//’ | sed ‘s/CARD_DETAILS.*ORTANO2//’ | sed ’s/.*\(..\)_asic_logs/\1/’|sed ‘s/.*FAILED.*/& <<</’
+hv  FPN22080177_snake_elba.log  FREQ  1100  TEMP  114.250  STAT  PASSED    TOT_PWR  99.0   W
+hv  FPN2208051E_snake_elba.log  FREQ  1100  TEMP  114.250  STAT  FAILED    TOT_PWR  99.3   W   <<<
+hv  FPN2208018A_snake_elba.log  FREQ  1100  TEMP  114.500  STAT  PASSED    TOT_PWR  98.0   W
+hv  FPN22070F02_snake_elba.log  FREQ  1100  TEMP  114.500  STAT  PASSED    TOT_PWR  100.5  W
+hv  FPN22070E91_snake_elba.log  FREQ  1100  TEMP  114.500  STAT  PASSED    TOT_PWR  97.2   W
+hv  FPN22070F1E_snake_elba.log  FREQ  1100  TEMP  114.500  STAT  PASSED    TOT_PWR  97.7   W
+hv  FPN2208014E_snake_elba.log  FREQ  1100  TEMP  114.500  STAT  PASSED    TOT_PWR  97.0   W
+hv  FPN22070EF7_snake_elba.log  FREQ  1100  TEMP  114.500  STAT  FAILED    TOT_PWR  99.6   W   <<<
+hv  FPN2208022D_snake_elba.log  FREQ  1100  TEMP  114.500  STAT  PASSED    TOT_PWR  95.5   W
+hv  FPN22070F81_snake_elba.log  FREQ  1100  TEMP  114.750  STAT  PASSED    TOT_PWR  100.5  W
+hv  FPN22080151_snake_elba.log  FREQ  1100  TEMP  114.750  STAT  FAILED    TOT_PWR  99.3   W   <<<
+hv  FPN22070F56_snake_elba.log  FREQ  1100  TEMP  114.750  STAT  PASSED    TOT_PWR  100.7  W
+hv  FPN2208026F_snake_elba.log  FREQ  1100  TEMP  114.750  STAT  FAILED    TOT_PWR  102.3  W   <<<
+hv  FPN22070F31_snake_elba.log  FREQ  1100  TEMP  114.750  STAT  PASSED    TOT_PWR  97.0   W
+hv  FPN22080215_snake_elba.log  FREQ  1100  TEMP  114.750  STAT  PASSED    TOT_PWR  104.5  W
+hv  FPN2208036C_snake_elba.log  FREQ  1100  TEMP  114.750  STAT  PASSED    TOT_PWR  97.7   W
+hv  FPN22080174_snake_elba.log  FREQ  1100  TEMP  114.750  STAT  PASSED    TOT_PWR  95.1   W
+lv  FPN22070EDD_snake_elba.log  FREQ  1100  TEMP  115.000  STAT  PASSED    TOT_PWR  92.2   W
+hv  FPN22070F73_snake_elba.log  FREQ  1100  TEMP  115.000  STAT  PASSED    TOT_PWR  99.3   W
+hv  FPN22070F78_snake_elba.log  FREQ  1100  TEMP  115.000  STAT  PASSED    TOT_PWR  98.6   W
+
+Some failed at low temp/power/v
+% \grep FAILED parse.txt | sed 's/ASIC_PWR.*//' | sed 's/CARD_DETAILS.*ORTANO.//' | sed 's/.*\(..\)_asic_logs/\1/' | sort -r -n -k 6 | tail -20 | sed 's/.*FAILED.*/& <<</'
+hv  FPN220805A3_snake_elba.log  FREQ  1100  TEMP  100.875  STAT  FAILED    TOT_PWR  -      W   <<<
+hv  FPN22080530_snake_elba.log  FREQ  1100  TEMP  100.875  STAT  FAILED    TOT_PWR  -      W   <<<
+hv  FPN220802AE_snake_elba.log  FREQ  1100  TEMP  100.875  STAT  FAILED    TOT_PWR  -      W   <<<
+hv  FPN2208020D_snake_elba.log  FREQ  1100  TEMP  100.375  STAT  FAILED    TOT_PWR  -      W   <<<
+hv  FPN22080162_snake_elba.log  FREQ  1100  TEMP  100.375  STAT  FAILED    TOT_PWR  -      W   <<<
+hv  FPN22080456_snake_elba.log  FREQ  1100  TEMP  100.125  STAT  FAILED    TOT_PWR  -      W   <<<
+hv  FPN220802BA_snake_elba.log  FREQ  1100  TEMP  100.125  STAT  FAILED    TOT_PWR  -      W   <<<
+hv  FPN22070F12_snake_elba.log  FREQ  1100  TEMP  99.875   STAT  FAILED    TOT_PWR  -      W   <<<
+hv  FPN2208058A_snake_elba.log  FREQ  1100  TEMP  99.625   STAT  FAILED    TOT_PWR  -      W   <<<
+hv  FPN2208037D_snake_elba.log  FREQ  1100  TEMP  99.625   STAT  FAILED    TOT_PWR  -      W   <<<
+hv  FPN22080377_snake_elba.log  FREQ  1100  TEMP  99.625   STAT  FAILED    TOT_PWR  -      W   <<<
+hv  FPN22070FF5_snake_elba.log  FREQ  1100  TEMP  97.375   STAT  FAILED    TOT_PWR  -      W   <<<
+lv  FPN22070A59_snake_elba.log  FREQ  1033  TEMP  94.250   STAT  FAILED    TOT_PWR  75.1   W   <<<
+hv  FPN220705F2_snake_elba.log  FREQ  1033  TEMP  94.250   STAT  FAILED    TOT_PWR  78.5   W   <<<
+lv  FPN22080181_snake_elba.log  FREQ  1100  TEMP  91.125   STAT  FAILED    TOT_PWR  91.2   W   <<<
+lv  FPN22070915_snake_elba.log  FREQ  1033  TEMP  89.375   STAT  FAILED    TOT_PWR  67.2   W   <<<
+lv  FPN22070C92_snake_elba.log  FREQ  1033  TEMP  88.875   STAT  FAILED    TOT_PWR  68.8   W   <<<
+hv  FPN22070927_snake_elba.log  FREQ  1033  TEMP  87.875   STAT  FAILED    TOT_PWR  72.0   W   <<<
+lv  FPN22070927_snake_elba.log  FREQ  1033  TEMP  86.125   STAT  FAILED    TOT_PWR  67.1   W   <<<
+lv  FPN220710A5_snake_elba.log  FREQ  1033  TEMP  79.375   STAT  FAILED    TOT_PWR  72.6   W   <<< (edited) 
+
+% \grep FPN220710A5_ parse.txt
+.  FPN220710A5  4C-H_MTP-726_2022-02-24_14-49-02  hv_asic_logs  FPN220710A5_snake_elba.log  FREQ  1033  TEMP  82.250   STAT  PASSED  CARD_DETAILS  ORTANO2  TOT_PWR  78.2   W  ASIC_PWR  45.1  W  29.7  10.5  4.9  VOLTAGE  0.740  0.870  AVS  11  5  TEMP  68.7  46.0  80.0   PMRO  1221  DIE_ID  0x35B46458445431642E7095
+.  FPN220710A5  4C-H_MTP-726_2022-02-24_14-49-02  lv_asic_logs  FPN220710A5_snake_elba.log  FREQ  1033  TEMP  79.375   STAT  FAILED  CARD_DETAILS  ORTANO2  TOT_PWR  72.6   W  ASIC_PWR  41.5  W  27.4  9.6   4.5  VOLTAGE  0.715  0.840  AVS  11  5  TEMP  66.2  46.0  78.0   PMRO  1221  DIE_ID  0x0000000000000000000000
+
+Added snake = PASS/FAIL or “na” if not finished
+Same card SN pass and fail at different V:
+Snake did not finish:
+\grep -w na parse.txt | awk ‘{print $2}’ | sort -u > fail_na ; grep -f fail_na parse.txt|sort -k 2
+Snake FAILED
+\grep -w FAILED parse.txt | awk ‘{print $2}’ | sort -u > fail_FAILED ; grep -f fail_FAILED parse.txt | sort -k 2
+ERRORs in logs:
+find . -name “*snake_elba.log” > all_logs ; \grep -wl ERROR `cat all_logs` | & tee fail_errors

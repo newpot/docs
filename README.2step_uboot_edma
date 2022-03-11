@@ -1,0 +1,35 @@
+# files needed
+~xguo2/workspace/uboot_prog/install_file
+~xguo2/workspace/uboot_prog/uboota.img-exp-122221_2step
+/vol/hw/diag/diag_images/sw_image/dsc_fw_athena_elba_1.15.9-C-56_2022.01.08.tar
+
+# Program images
+1. Make sure NIC does not boot into mainfwa
+2. Copy files to NIC
+3. On NIC
+fwupdate -p dsc_fw_athena_elba_1.15.9-C-56_2022.01.08.tar -i mainfwa
+fwupdate -s mainfwa
+./install_file uboota uboota.img-exp-122221_2step
+fwenv -s ddr_verbose 1
+fwenv -s ddr_init_external 1
+sysreset.sh
+# NIC will boot into "g" prompt
+
+# Configure DDR via J2C
+# While NIC is "g" promot, start tclsh
+set slot <>
+set port [mtp_get_j2c_port $slot]
+set slot1 [mtp_get_j2c_slot $slot]
+diag_close_j2c_if $port $slot1
+diag_open_j2c_if $port $slot1
+_msrd
+# following two commands can be change as needed
+run_ddr 3200
+elb_nx_cache_enable
+
+# Back to NIC console
+# type 'g', NIC will try to boot into mainfwa
+# Make sure NIC does boot into mainfwa
+# Run edma test
+/nic/bin/ddr_test.sh
+

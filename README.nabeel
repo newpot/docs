@@ -1,0 +1,61 @@
+#===================yy======
+# ARM test
+1. No need to power cycle for AAPL initialization. 
+   All DSP tests can be run within the same power cycle. 
+   kill hal is needed
+
+2. ARM L1 is added to nic_asic dsp. 
+   David Wang is testing and will provide command format later.
+
+3. Following files need to be copied after DSP tests with SN inserted in file name
+/data/nic_arm/nic/asic_src/ip/cosim/tclsh/
+elba_PRBS_MX.log
+elba_PRBS_PCIE.log
+elba_arm_l1_test.log
+
+4. Snake test
+   Same format as Capri with different mode value
+Oracle: mode=hod
+Pensando: mode=hod_1100
+./nic_test.py -snake -slot_list 5 -wtime 300 -mode $mode
+
+4.1
+# Log file location
+/data/nic_arm/nic/asic_src/ip/cosim/tclsh/snake_elba.log
+# Insert SN to file name
+
+#--------------------------
+L1 test
+Oracle: mode=hod
+Pensando: mode=hod_1100
+
+#===================yy======
+# Convert between Capri and Elba MTP
+
+# Image location
+/vol/hw/diag/diag_images/CPLD/
+
+# Capri CPLD Images
+-rw-rw-r-- 1 xguo2     hw  51168 Feb 12 11:39 NIC_MTP_IO_rev7_10232019.bin
+-rw-rw-r-- 1 xguo2     hw  51168 Feb 12 11:39 NIC_MTP_JTAG_rev3.bin
+
+# Elba Images
+-rw-rw-r-- 1 xguo2     hw  51168 Jan 15 17:15 mtp_elba_io_rev1_07222020.bin
+-rw-rw-r-- 1 xguo2     hw  51168 Jan 15 17:15 mtp_elba_jtag_rev1_07302020.bin
+
+# Command to program
+cpldutil -cpld-flash-prog -type IO -input <io_cpld_image>
+cpldutil -cpld-flash-prog -type JTAG -input <jtag_cpld_image>
+
+# Determine current MTP configuration
+diag@MTP:~$ env | grep MTP
+MTP_REV=REV_04      <== MTP Rev4
+CARD_NAME=MTP1
+CARD_TYPE=MTP
+UUT_TYPE=NAPLES_MTP
+MTP_TYPE=MTP_CAPRI  <== Capri MTP
+
+MTP_TYPE=MTP_ELBA   <== Elba MTP
+
+# Remarks
+1. Only MTP Rev03/04 can be converted

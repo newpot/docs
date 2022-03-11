@@ -1,0 +1,61 @@
+# Bring up NIC management port
+slot_list="2,3,4,5,6,7,8,9,10"
+slot_list="2"
+cd diag/python/regression/
+./nic_test.py -setup_multi -slot_list $slot_list -mgmt -fpo
+
+#===============================
+# Go to NIC
+ssh_s.sh $slot
+
+# only need once
+fwupdate --init-emmc
+mount /dev/mmcblk0p10 /data/
+exit
+
+
+#===============================
+# Copy files to NIC
+slot=1
+scp_s.sh ~/arm_image/nic_util.tar $slot /data/
+scp_s.sh ~/arm_image/nic_arm.tar $slot /data/
+scp_s.sh ~/arm_image/naples200_ortano2_rev3_5_04012021.bin $slot /data/
+
+#===============================
+# Go to NIC
+con_connect $slot
+
+cd /data/
+tar xf nic_util.tar
+tar xf nic_arm.tar
+sync
+sync
+
+export CARD_TYPE=ORTANO2
+/data/nic_util/xo3dcpld -prog /data/naples200_ortano2_rev3_5_04012021.bin cfg0
+
+/data/nic_util/devmgr -dev=ELB0_CORE -vboot -vout=750
+/data/nic_util/devmgr -dev=ELB0_ARM -vboot -vout=850
+# check Vboot got changed
+/data/nic_util/devmgr -status
+
+/data/nic_util/xo3dcpld -refresh
+
+# Console will have no output. Just quit console
+# move to the next card and process
+
+#===============================
+# Check
+./nic_test.py -setup_multi -slot_list $slot_list
+
+#===============================
+# Go to NIC
+con_connect $slot
+
+cd /data/
+export CARD_TYPE=ORTANO2
+# Make sure VOUT is the same as Vboot
+/data/nic_util/devmgr -status
+# check CPLD rev
+/data/nic_util/xo3dcpld -r 0
+/data/nic_util/xo3dcpld -r 0x1e

@@ -1,0 +1,53 @@
+# Worked only on diagfw
+
+# On ARM Console
+
+# Diag env setup
+fsck -y /dev/mmcblk0p10
+mount /dev/mmcblk0p10 /data
+source /data/nic_arm/nic_setup_env.sh
+source /etc/profile
+/data/nic_util/xo3dcpld -w 1 0x0
+/data/nic_util/xo3dcpld -r 1
+cd /data/nic_arm/nic/asic_src/ip/cosim/tclsh/
+export PCIE_ENABLED_PORTS=0
+export MTP_REV=REV_4
+
+# Init mgmt port
+sysinit.sh classic hw diag
+sleep 30
+ifconfig oob_mnic0 10.1.1.<100+slot> netmask 255.255.255.0
+# Make sure ping works
+ping 10.1.1.100
+
+# Copy 2-step diagfw to NIC
+# ~xguo2/workspace/platform-image/ortano2_ddr_qspi/ubootd_2_step/diagfw_2_step_uboot.tar
+# copy diagfw.tar to nic /data
+fwupdate -p diagfw_2_step_uboot.tar -i boot0
+fwupdate -p diagfw_2_step_uboot.tar -i diagfw
+
+# Enable 2-step
+fwenv -s ddr_verbose 1
+fwenv -s ddr_init_external 1
+
+# power cycle
+
+#=========================
+# mainfw
+
+
+
+#=========================
+# Not needed unless...
+args=earlycon=uart8250,mmio32,0x4800 console=ttyS0,19200n8
+baudrate=115200
+bootargs=earlycon=uart8250,mmio32,0x4800 softdog.soft_panic=1 console=ttyS0,115200n8 capmem=c0000000-c3ffffff:coherent,c4000000-1ffffffff:noncoherent,1000000000-107fffffff:noncoherent,1200000000-123fffffff:noncoherent FW_NAME=diagfw
+bootcmd=boot
+bootdelay=0
+fdtaddr=bff4d000
+fdtcontroladdr=bff55a90
+initrd_end=0
+initrd_start=0
+stderr=serial@4800
+stdin=serial@4800
+stdout=serial@4800

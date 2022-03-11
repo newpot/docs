@@ -1,0 +1,25 @@
+# On MTP
+cd
+# Need once every time a card is inserted in MTP
+./start_diag.sh
+source .bash_profile
+
+cd diag/python/regression
+slot=6
+./nic_test.py -setup_multi -slot_list $slot
+
+# Use NIC console
+con_connect.sh $slot
+
+# Change core voltage if needed. Make sure vout is as desired
+/data/nic_util/devmgr -dev=ELB0_CORE -margin -mgmode mv -vout 735
+sleep 1
+/data/nic_util/devmgr -status
+
+test_time=600
+# Snake with internal loopback
+int_lpbk=1
+./diag.exe ../elba/elb_arm_snake.tcl hod_1100 $test_time $int_lpbk 1
+
+# Check result
+grep -B7 -A4 "LOCAL(" snake_elba.log | tail -12

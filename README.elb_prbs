@@ -1,0 +1,43 @@
+MTP IP: 70.90 slot 5
+
+# On MTP
+slot=5
+cd /home/diag/diag/python/regression
+./nic_test.py -setup_multi -slot_list $slot -mgmt
+
+# Copy file
+scp_s.sh <file_name> $slot <>
+
+con_connect 5
+# On ARM
+
+# ASIC path
+/data/nic_arm/nic/
+
+# env | grep ASIC
+# ASIC_LIB=/data/nic_arm/elba/asic_lib
+# ASIC_GEN=/data/nic_arm/elba//asic_src
+# ASIC_SRC=/data/nic_arm/elba//asic_src
+# ASIC_LIB_BUNDLE=/data/nic_arm/elba
+#
+#
+# nic -> /data/nic_arm/elba
+
+
+# PCIE PRBS
+./diag.exe elb_pcie_prbs.tcl 30
+
+# Eth PRBS
+./diag.exe elb_mx_prbs.tcl 30 0
+
+#====================================
+# Snake test
+./nic_test.py -setup_multi -slot_list $slot
+
+# ARM
+# Diag command
+/data/nic_util/asicutil -snake -mode hod -dura 30 -verbose
+
+# ASIC tcl command
+./diag.exe snake_elba.tcl hod 60 1
+

@@ -1,0 +1,23 @@
+# Make sure do this every time a card is inserted to MTP
+cd
+./start_diag.sh
+source .bash_profile
+
+# If file needs to be transferred to NIC
+cd diag/python/regression
+slot=3
+./nic_test.py -setup_multi -slot_list $slot -mgmt
+
+# Tranfer files from MTP to NIC
+scp_s.sh file_name $slot <target dir>
+scp_s.sh nic_util.tar $slot /data
+
+# On NIC console
+slot=7
+con_connect.sh $slot
+mount /dev/mmcblk0p10 /data
+cd /data/
+cd nic_util
+./xo3cpld -r <addr>
+./xo3cpld -w <addr> <data>
+

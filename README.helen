@@ -1,0 +1,19 @@
+set slot 4
+turn_on_slot.sh off $slot; turn_on_slot.sh on $slot
+set port [mtp_get_j2c_port $slot]
+set slot1 [mtp_get_j2c_slot $slot]
+diag_close_j2c_if $port $slot1
+diag_open_j2c_if $port $slot1
+_msrd
+#ddr_phy_pll_report
+#check_ecc_intr
+elb_card_rst $port $slot1 hod 3000 3200 0 0 "127" 0 1 normal 0 0
+
+slot=4
+turn_on_slot.sh off $slot
+turn_on_slot_3v3.sh on $slot
+i2cset -y 0x0 0x4a 0x21 0x34
+i2cget -y 0x0 0x4a 0x21
+i2cset -y 0x0 0x4a 0x20 0
+i2cget -y 0x0 0x4a 0x20
+turn_on_slot.sh on $slot

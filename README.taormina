@@ -1,0 +1,124 @@
+# initial set up
+# All diag files will be at /fs/nos/home_diag/
+mkdir -p /fs/nos/home_diag
+
+# copy image_amd64_elba.tar to /fs/nos/home_diag
+# untar
+./start_diag_tor.sh
+source /home/root/.profile
+
+# Working dir
+Symbolic link under /home
+diag -> /fs/nos/home_diag
+To keep it consistent with existing structure
+/home/diag
+
+# Python files - Will create a separate tar file
+Location: ~xguo2/workspace/python_files
+On Taormina, use PYTHONPATH
+PYTHONPATH=/home/diag/python_files
+
+# Env configuration file:
+start_diag_tor.sh
+taor_init.sh # Called by /home/root/.profile
+
+# start DSP
+diagmgr # same as before
+diag -r -c TOR1 -d diagmgr -t dsp_start
+
+# To add new DSP/Test
+under dspYaml/
+Taormina is under TOR
+
+# L1 Test:
+Remove elba from PCIe bus before L1 test
+
+# QSPI image
+# ~xguo2/workspace/platform-image/
+# make_first_article
+# Three files are needed with exact name
+u-boot.img  # has to be legacy uboot 0x70100000
+goldfw.img
+diagfw.img
+
+# Minimal: to have legacy uboot + goldfw
+
+avinash@hw-srv1:/tftpboot/brian/images$ ls
+elba-all.bin  goldfw-0224.bin  image#17.swi  msi.swi  taormina-main-1.28.0-3.swi  uboot.bin  ubootgold.bin
+
+Taormina full image: /vol/builds/hourly/1.28.0-64/polaris-bundle/taormina-main-1.28.0-64.swi
+Elba Mainfw: /vol/builds/hourly/1.28.0-64/sw-polaris-elba/sw/nic/naples_fw_elba.tar
+Elba diagfw: I’m not sure how diagfw is built.
+
+# Generate diagfw.tar with legacy uboot
+Example: 
+~xguo2/workspace/platform-image/elba_image_2021.05.15/
+Untar original tar ball
+remove ""package_version": 2," from MANIFEST
+Add a section for uboot
+
+# List of tasks
+1. eMMC in pSLC mode?
+2. AVS
+set_avs_elb.tcl
+Need to change slot to 3021/3031 for slot 1/2
+Find physical location mapping to slot number
+mode core/arm
+core: 1033 or 1100
+arm: 3000
+
+# ASIC lib update
+# Diag ASIC repo
+/vol/hw/diag/diag_repo/asic
+
+# Update asic from TOT
+https://www.evernote.com/shard/s150/sh/765f264d-4cb6-4773-a43a-e7eceb85bec4/bdc35afe80cb61da70fe89a8603f2949
+
+# GIT
+# Initial set up
+# Upstream
+# One time configure
+git remote add upstream git@github.com:pensando/asic.git
+git submodule update --recursive --init
+$ASIC_SRC/common/tools/bin/pensim-get.sh
+
+git fetch upstream master
+git merge upstream/master 
+
+# After compilation
+diag/scripts/asic/update_diag_asic_repo_new.sh elba/capir amd64/arm64
+Example: diag/scripts/asic/update_diag_asic_repo_new.sh elba amd64
+
+# To test before deploy
+Change path in update_diag_asic_repo_new.sh and packaging.sh
+
+Validate before release
+
+#---------------------------
+xguo2@hw-srv1:~/workspace/psdiag1/diag/scripts/asic$ git diff update_diag_asic_repo_new.sh
+diff --git a/diag/scripts/asic/update_diag_asic_repo_new.sh b/diag/scripts/asic/update_diag_asic_repo_new.sh
+index cf5d23cf..c2456af1 100755
+--- a/diag/scripts/asic/update_diag_asic_repo_new.sh
++++ b/diag/scripts/asic/update_diag_asic_repo_new.sh
+@@ -11,8 +11,8 @@ ARCH=${ARCH,,}
+ ASIC_REPO="/home/$USER/workspace/asic/"
+ ASIC_TMP="/home/$USER/workspace/temp/"
+
+-#DIAG_REPO_TOP="/vol/hw/diag/diag_repo/asic.2020.02.10/"
+ DIAG_REPO_TOP="/vol/hw/diag/diag_repo/asic/"
++DIAG_REPO_TOP="/vol/hw/diag/diag_repo/asic.2021.05.20/"
+
+#---------------------------
+xguo2@hw-srv1:~/workspace/psdiag1/build/scripts$ git diff packaging.sh
+diff --git a/build/scripts/packaging.sh b/build/scripts/packaging.sh
+index 092a1085..8e6bee2b 100755
+--- a/build/scripts/packaging.sh
++++ b/build/scripts/packaging.sh
+@@ -137,7 +137,7 @@ do
+     DIAG_ASIC_PATH=$TOP_DIR/asic_repo/$asic/$arch
+     #SNAKE_CFG_PATH=/vol/hw/diag/diag_repo/snake_configs/
+     ASIC_REPO_PATH=/vol/hw/diag/diag_repo/asic/$asic/$arch
+-    #ASIC_REPO_PATH=/vol/hw/diag/diag_repo/asic.2021.03.30/$asic/$arch
++    ASIC_REPO_PATH=/vol/hw/diag/diag_repo/asic.2021.05.20/$asic/$arch
+
+

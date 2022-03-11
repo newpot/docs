@@ -1,0 +1,119 @@
+#===================================
+# Run ARM snake with interactive shell
+slot=2
+cd ~/diag/python/regression
+./nic_test.py -setup_multi -slot_list $slot
+
+con_connect.sh $slot
+
+# You are in tclsh directory on ARM now
+echo "source .tclrc.diag.elb.arm" > elba_start_arm_tclsh.tcl
+diag.exe elba_start_arm_tclsh.tcl
+
+# You are in tclsh shell
+set volt_mode hod
+
+set core_freq [elb_core_freq_for_mode $volt_mode]
+set stg_freq [elb_stg_freq_for_mode $volt_mode]
+puts "stg_freq: $stg_freq"
+set eth_freq 900
+
+elb_set_freq $core_freq
+puts "stg_freq1: $stg_freq"
+elb_soc_stg_pll_init 0 0 $stg_freq
+elb_mm_eth_pll_init 0 0 $eth_freq
+
+elb_top_sbus_cpu_${arm_freq} 0 0
+
+get_freq
+elb_top_sbus_get_cpu_freq 0 0
+
+plog_start elba_snake.log
+#elb_print_die_id
+set duration 12
+ elb_snake_test_mtp 6 4096 1 1 $core_freq 1 $duration
+plog_stop
+
+#===================================
+cd ~/diag/python/regression
+./nic_test.py -setup_multi -slot_list 4
+script -f skew_slot4.log
+./nic_test.py -skew -fan_ctrl -tgt_die_temp 80 -slot_list 4
+exit
+
+# Change test configuration
+# edit nic_test.py with following fields
+
+        # Manul change here
+        core_freq = 1033
+        arm_freq = 3000
+        core_volt = "xxx"
+        arm_volt = "xxx"
+        volt_mode = "hod"
+
+# Change SVS voltage
+cd ~/diag/scripts/asic/
+slot=5
+tclsh set_avs_elb.tcl -sn slot$slot -slot $slot -core_freq 1033 -arm_freq 3000
+
+# Copy file from nic
+slot=5
+./nic_test.py -setup_multi -slot_list $slot -mgmt
+con_connect.sh $slot
+scp <file_name> diag@10.1.1.100:<MTP path>
+
+#===================================
+mkdir -p /data/elba ; mount /dev/mmcblk0p10 /data; mkdir -p /data/elba; cd /data/elba
+export CARD_ENV="ARM"
+export CARD_TYPE="ORTANO2"
+
+cd /data/nic_arm/nic/
+
+export ASIC_LIB_BUNDLE=`pwd`
+export ASIC_SRC=$ASIC_LIB_BUNDLE/asic_src
+source $ASIC_LIB_BUNDLE/asic_lib/source_env_path
+cd $ASIC_SRC/ip/cosim/tclsh
+#$ASIC_LIB_BUNDLE/asic_lib/diag.exe
+#source .tclrc.diag.elb.arm
+
+./diag.exe start_elba_arm_tclsh.tcl
+
+set ::env(CARD_ENV) ARM
+set ::env(CARD_TYPE) ORTANO2
+set ::env(MTP_REV) REV_4
+elb_appl_set_srds_int_timeout 5001
+
+ sleep 1
+
+set core_freq 1100.0
+set arm_freq 3000
+#set core_freq 833.0
+#set arm_freq 2000
+set core_volt 760
+set arm_volt 850
+set ::env(CARD_ENV) ARM
+set ::env(CARD_TYPE) ORTANO2
+set ::env(MTP_REV) REV_4
+
+set volt_mode hod
+
+set core_freq1 [elb_core_freq_for_mode $volt_mode]
+set stg_freq [elb_stg_freq_for_mode $volt_mode]
+puts "stg_freq: $stg_freq"
+set eth_freq 900
+
+elb_set_freq $core_freq1
+puts "stg_freq1: $stg_freq"
+elb_soc_stg_pll_init 0 0 $stg_freq
+elb_mm_eth_pll_init 0 0 $eth_freq
+
+elb_top_sbus_cpu_${arm_freq} 0 0
+
+get_freq
+elb_top_sbus_get_cpu_freq 0 0
+
+plog_start elba_snake.log
+#elb_print_die_id
+set duration 12
+ elb_snake_test_mtp 6 4096 1 1 $core_freq 1 $duration
+plog_stop
