@@ -1,0 +1,27 @@
+MTP IP: 192.168.1.180
+slot 1:
+
+slot=1
+cd ~/diag/python/regression/
+
+# set up mgmt port
+./nic_test.py -setup_multi -slot_list $slot -mgmt
+
+#copy over uboot image to /data/
+
+# To install ubootg
+con_connect.sh $slot
+cd /data
+./install_file golduboot <uboot.img>
+
+# run snake
+# set up snake env
+./nic_test.py -setup_multi -slot_list $slot
+
+con_connect.sh $slot
+
+# Run one of following two
+# End to end snake:
+/data/nic_util/asicutil -snake -mode hod -dura 30 -verbose -int_lpbk -snake_num 6
+# EDMA + end to end snake
+/data/nic_util/asicutil -snake -mode hod -dura 3 -verbose -int_lpbk -snake_num 4

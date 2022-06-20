@@ -1,0 +1,32 @@
+On platform-dev1:
+/local2/dac2/goldfw-corrupt/francis-diagfw-corrupt/a.out
+12:34
+That program expects to see two files in the current directory:
+corrupt.img - the image to inspect
+kerne.img   - the reference good image
+It runs through both images, finding the differences and displaying the results.
+e.g.:
+$ cd /local2/dac2/goldfw-corrupt/francis-diagfw-corrupt/third_card
+$ ls -l
+total 130956
+lrwxrwxrwx 1 dac2 dac2        18 Apr 23 11:39 corrupt.img -> out_diagfw_14F.bin
+lrwxrwxrwx 1 dac2 dac2        13 Apr 23 11:38 kernel.img -> ../kernel.img
+-rw-r--r-- 1 dac2 dac2 134086656 Apr 23 11:38 out_diagfw_14F.bin
+$ ../a.out
+G: 0x00000000...0x02ffffff (50331648)
+B: 0x03000000...0x030000ff (     256)
+G: 0x03000100...0x0300ffff (   65280)
+B: 0x03010000...0x030100ff (     256)
+G: 0x03010100...0x0301ffff (   65280)
+B: 0x03020000...0x030200ff (     256)
+G: 0x03020100...0x0302ffff (   65280)
+B: 0x03030000...0x030300ff (     256)
+G: 0x03030100...0x0303ffff (   65280)
+B: 0x03040000...0x030400ff (     256)
+...
+
+Xin  12:35 PM
+Got it. thanks!
+
+dac2  12:36 PM
+In the a.out directory is the source, scan.c, which you can take and modify so the program takes arguments (to be a little more user friendly, if you like)

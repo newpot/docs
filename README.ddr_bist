@@ -1,0 +1,66 @@
+1. Copy image_amd64_elba.tar to MTP home directory: /home/diag
+2. Log in to MTP
+
+cd
+tar xf image_amd64_elba.tar
+
+./start_diag.sh
+source .bash_profile
+
+3. run DDR_BIST
+cd diag/scripts/asic/
+
+# For parameter info
+tclsh ddr_bist.tcl -?
+
+# Ortano cards
+tclsh ddr_bist.tcl -sn <sn> -slot <slot>
+
+# Pomonte
+tclsh ddr_bist.tcl -sn <sn> -slot <slot> -mode nod
+
+# Lacona
+tclsh ddr_bist.tcl -sn <sn> -slot <slot> -mode nod_525 -dual_rank 1 -ddr_freq 2400
+
+4 At the end of the test, pass/fail will be displayed with error info if test fails.
+
+5 Example:
+
+[22-06-16 09:49:28] MSG :: =============================
+[22-06-16 09:49:28] MSG :: DDR BIST FAILED
+[22-06-16 09:49:28] MSG :: DDR BIST FAILED
+
+>>>>>>Closing file : ddr_bist_sn_slot9_slot_9_061622_094338.log
+
+[22-06-16 09:49:28] MSG :: =============================
+[22-06-16 09:49:28] MSG ::
+
+
+
+[22-06-16 09:49:28] MSG :: ====== FULL ERROR INFO ======
+[22-06-16 09:49:28] MSG :: [22-06-16 09:45:36] ERROR :: MC0: CORE0: DDR CTRL DATA BIST FAIL
+[22-06-16 09:45:36] ERROR :: MC0: CORE0:DDR CTRL DATA BIST BAD BITS:16 18 20 22 80 82 84 86 144 146 148 150 208 210 212 214
+[22-06-16 09:45:36] ERROR :: MC0: CORE0:DDR CTRL DATA BIST BAD SLICE: 2 BIT: 0
+[22-06-16 09:45:36] ERROR :: MC0: CORE0:DDR CTRL DATA BIST BAD SLICE: 2 BIT: 2
+[22-06-16 09:45:36] ERROR :: MC0: CORE0:DDR CTRL DATA BIST BAD SLICE: 2 BIT: 4
+[22-06-16 09:45:36] ERROR :: MC0: CORE0:DDR CTRL DATA BIST BAD SLICE: 2 BIT: 6
+[22-06-16 09:49:26] ERROR ::            -- DFI_ERROR_INFO=0x44444444
+[22-06-16 09:49:26] ERROR ::            -- DFI_ERROR_INFO=0x44444444
+[22-06-16 09:49:26] ERROR ::            -- DFI_ERROR_INFO=0x10444
+[22-06-16 09:49:26] ERROR ::         -- Bit 0: RSVD1=0
+[22-06-16 09:49:26] ERROR ::         -- Bit 1: RSVD2=0
+[22-06-16 09:49:26] ERROR ::         -- Bit 2: PARITYERR_RDIMM=1
+[22-06-16 09:49:26] ERROR ::         -- Bit 3: RSVD3=0
+[22-06-16 09:49:26] ERROR ::         -- Bit 4: RSVD4=0
+[22-06-16 09:49:28] ERROR :: MC0: CORE0: DDR CTRL ADDR BIST FAIL
+[22-06-16 09:49:28] MSG :: =============================
+[22-06-16 09:49:28] MSG ::
+
+
+
+[22-06-16 09:49:28] MSG :: ====== SLICE ERROR INFO ======
+[22-06-16 09:49:28] MSG :: [22-06-16 09:45:36] ERROR :: MC0: CORE0:DDR CTRL DATA BIST BAD SLICE: 2 BIT: 0
+[22-06-16 09:45:36] ERROR :: MC0: CORE0:DDR CTRL DATA BIST BAD SLICE: 2 BIT: 2
+[22-06-16 09:45:36] ERROR :: MC0: CORE0:DDR CTRL DATA BIST BAD SLICE: 2 BIT: 4
+[22-06-16 09:45:36] ERROR :: MC0: CORE0:DDR CTRL DATA BIST BAD SLICE: 2 BIT: 6
+[22-06-16 09:49:28] MSG :: =============================

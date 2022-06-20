@@ -1,0 +1,62 @@
+https://docs.google.com/document/d/1WKoKAtOt-vgOMQyUtZob5EXHOev67QddQfn6zlNAUs4/edit
+
+dac2  9:41 AM
+Ok, so we’re clear on how it works:
+The flash has a Status Register that contains the Block Protection setting and a Status Register Write Disable (WRDIS) bit.
+… The Block Protection setting establishes the write protection over 2**N sectors at the top or bottom of the flash (we want bottom)
+… The Status Register Write Disable bit works with the Write Protect Pin (WP#) to prevent changes to the Status Register
+So unless you’ve configured block protection and set the WRDIS bit, the WP# signal doesn’t do anything.  That’s the current state.
+9:42
+What’s the default value for the WP# signal out of the CPLD?  Asserted or de-asserted?
+
+Xin  9:43 AM
+need Andy to confirm WP bit state
+
+dac2  9:44 AM
+Ok.  Doesn’t matter as the SR remains writeable until you take the above steps.
+9:44
+BTW this is all documented (incl. the u-boot commands) in the Flash doc we gave to Oracle
+9:44
+Here’s my hwprot command:
+DSC# help hwprot                                                                
+hwprot - flash hardware protection                                              
+                                                                                
+Usage:                                                                          
+hwprot [(wren|wrdis) (top|bot) size]                                            
+DSC# hwprot                                                                     
+SR write-disabled, W# asserted (SR locked), BP bot 0x10000 [0x0...0xffff]       
+9:45
+You can see the last line.  On my Elba I’ve turned it on to protect the eSecure block
+9:47
+SR write-disabled
+^^^^^^^^^^^^^^^^^ This means the WRDIS bit is set in the Status Register to prevent updates to the SR
+
+W# asserted (SR locked)
+^^^^^^^^^^^^^^^^^^^^^^^
+This means the W# pin is asserted.
+Because the WRDIS bit is set AND W# is asserted, the SR is LOCKED (i.e. can't be changed by SW)
+
+BP bot 0x10000 [0x0...0xffff]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+This is the block protection setting.  Securing just the lowest 1 sector.
+9:47
+And you can see it can’t be changed:
+DSC# hwprot wren bot 0                                                          
+## SR locked (write-disabled and W# asserted)                                   
+9:48
+Note that wren and wrdis refer to the WRDIS bit  that controls write access to the SR.  Not the flash blocks.  If the BP settings that affect flash blocks.
+9:50
+So, in manufacturing, you want to do (after eSecure setup):
+DSC# hwprot wrdis bot 0x10000
+9:50
+You should validate this on a card before doing it, of course.
+9:51
+Just protect 0x10000 (64K) bytes.
+
+
+Xin  10:30 PM
+@dac2 what is the command disable WP?
+hwprot wren bot 0x10000?
+
+dac2  11:34 PM
+hwprot wren bot 0

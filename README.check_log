@@ -1,0 +1,82 @@
+#=========================
+tail -10 mtp_test.log
+sn=FPA22030014
+tail -10 mtp_test.log | grep $sn
+slot=$(tail -10 mtp_test.log | grep $sn | tail -1 | awk -F ":" '{print $3}' | awk -F " " '{print $1}')
+log_name="mtp_"$slot"_diag.log"
+ls $log_name
+
+#=========================
+# DL
+
+rg -a "tclsh set_avs_elb.tcl" $log_name
+rg -a "tclsh ./esec_l1_prog_elba.tcl" $log_name
+
+rg -a fix_o2_vrm_oc.sh $log_name
+rg -A10 -a "fix_o2_vrm_oc.sh apply" $log_name
+
+rg -a -A1 -e i2cget -e i2cset $log_name
+rg -a board_config $log_name
+
+#=========================
+# P2C / 4C
+
+# check ASIC log
+find . -name *$sn*
+find . -name l1*$sn*log | xargs grep "argv: $sn"
+find . -name l1*$sn*log | xargs grep -B13 -A1 "L1_SCREEN"
+find . -name *$sn*snake*log | xargs grep -A5 "BW_voltage_temp report" | head -6
+find . -name *$sn*snake*log | xargs grep -A5 "BW_voltage_temp report" | tail -10
+
+find . -name *$sn*PRBS_MX.log | xargs grep -a -e "elb_chk_ber" -e "MX PRBS"
+find . -name *$sn*PRBS_PCIE.log | xargs grep -a -e "elb_aapl_prbs_check" -e "elb_pcie_srds_prbs" -e "PCIE PRBS"
+find . -name *$sn*arm_l1*log | xargs grep -a -A3 -B1 "ARM L1 TESTS STATUS"
+rg -a -e "arm_prbs.py" -e "arm_l1.py" -e "nic_test.py -snake" mtp_diag.log
+rg -a -e "arm_prbs.py" -e "arm_l1.py" -e "nic_test.py -snake" -e "ddr_bist.py" -e "vmarg.sh" mtp_diag.log
+
+rg -a "run_l1.sh" $log_name
+
+# EDMA ==> 10 times
+rg -a "EDMA TEST" $log_name
+rg -a "EDMA TEST" $log_name | wc
+
+rg -a "EDMA           SUCCESS" $log_name
+rg -a "EDMA           SUCCESS" $log_name | wc
+
+#=========================
+# P2C
+
+# DSP Tests
+find nic_logs/$slot/ -name log*txt | xargs grep "TEST DONE"
+
+#=========================
+# 4C
+
+# DSP Tests
+find lv_nic_logs/$slot/ -name log*txt | xargs grep "TEST DONE"
+find hv_nic_logs/$slot/ -name log*txt | xargs grep "TEST DONE"
+
+rg -a "vmarg.sh" $log_name
+
+#=========================
+# SWI
+
+# Oracle cards need last char of "read_serial_number" to be 4f
+rg -a -A1 -e "esec_ctrl.py" -e "EFUSE PROG PASSED" -e "ESEC PROG PASSE" -e "esec read_serial_number"  $log_name
+
+img=mainfwa
+rg -a -A34 "$img\":" $log_name | tail -35 | grep -e $img -e "system_image" -e "kernel_fit" -e "uboot" -e software_version
+img=mainfwb
+rg -a -A34 "$img\":" $log_name | tail -35 | grep -e $img -e "system_image" -e "kernel_fit" -e "uboot" -e software_version
+img=goldfw
+rg -a -A21 "$img\":" $log_name | tail -22 | grep -e $img -e "system_image" -e "kernel_fit" -e "uboot" -e software_version
+
+rg -a -A1 -e "fwupdate -s" -e "fwupdate -r" $log_name
+
+#=========================
+# FST
+rg -a -A1 "lspci -vv" diag_fst.log
+rg -a "ROT test PASSED" diag_fst.log
+
+rg -a -A1 -e "fwupdate -s" -e "fwupdate -r" diag_fst.log
+rg -a -A150 "fwupdate -l" diag_fst.log | grep -e "boot0" -e "mainfwa" -e "mainfwb" -e "goldfw" -e "diagfw" -e "extdiag" -e "system_image" -e "kernel_fit" -e "uboot" -e "software_version"

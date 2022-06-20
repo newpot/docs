@@ -1,10 +1,10 @@
 #====================
-Host server: 192.168.71.109
+Host server: 192.168.69.212
 APC: 192.168.68.14 P9
 Login: root/lab123
 
 J2C Server: 192.168.69.142
-APC: 192.168.70.141 P14
+APC: 192.168.68.14 P8
 Longin: diag/lab123
 
 Console cap-ts1 2006
@@ -22,6 +22,7 @@ APC login: apc/apc
 
 # Set up tcl environment
 # cp /vol/hw/diag/xin/nic/ to your own folder
+cd xin/
 cd nic
 export ASIC_LIB_BUNDLE=`pwd`
 export ASIC_SRC=$ASIC_LIB_BUNDLE/asic_src
@@ -56,13 +57,14 @@ elb_card_rst 0x14 0x10 nod_550 3200 2000 0 0 "127" 0 1 normal 0 0
 exit
 
 # Configure NIC PCIe on host server via J2C 
-# first time, we need to ssh from j2c machine to host
-$ASIC_SRC/ip/cosim/elba/pcie/bringup_host_using_j2c.bash $ASIC_LIB_BUNDLE 192.168.75.151 lab123 0x14 0x10 qspi
+# In case that host IP changes, we need to ssh from j2c serer to host once
+$ASIC_SRC/ip/cosim/elba/pcie/bringup_host_using_j2c.bash $ASIC_LIB_BUNDLE 192.168.69.212 lab123 0x14 0x10 qspi
 
 #--------------------
 # On host server
 
 # Log in to host server with root/lab123
+lspci -d 1dd8:
 cd kinjal/pciflash/
 ./load_first_article.bash first_article_img.bin.0604.a
 
