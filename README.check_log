@@ -11,12 +11,24 @@ ls $log_name
 
 rg -a "tclsh set_avs_elb.tcl" $log_name
 rg -a "tclsh ./esec_l1_prog_elba.tcl" $log_name
+rg -a "nic_test.py -dis_esec_wp" mtp_diag.log
 
+# Only MSFT needs it
 rg -a fix_o2_vrm_oc.sh $log_name
 rg -A10 -a "fix_o2_vrm_oc.sh apply" $log_name
 
 rg -a -A1 -e i2cget -e i2cset $log_name
 rg -a board_config $log_name
+
+# For Lacona and Pomonte
+rg -a "artix7fpga" $log_name
+
+# eMMC fix
+rg -a -A1 "grep -i reset" $log_name
+rg -a -A4 "grep -i ops" $log_name
+
+# check version of boot0/uboot/diagfw rev
+rg -a -A151 "fwupdate -l" $log_name | grep -e "boot0" -e "goldfw" -e "diagfw" -e "extdiag" -e "system_image" -e "kernel_fit" -e "uboot" -e "software_version" | tail -35
 
 #=========================
 # P2C / 4C
@@ -24,17 +36,24 @@ rg -a board_config $log_name
 # check ASIC log
 find . -name *$sn*
 find . -name l1*$sn*log | xargs grep "argv: $sn"
+
+# L1 command and report
+rg -a "run_l1.sh" $log_name
 find . -name l1*$sn*log | xargs grep -B13 -A1 "L1_SCREEN"
+
+# Snake BW
+rg -a -e "nic_test.py -snake" mtp_diag.log
 find . -name *$sn*snake*log | xargs grep -A5 "BW_voltage_temp report" | head -6
 find . -name *$sn*snake*log | xargs grep -A5 "BW_voltage_temp report" | tail -10
 
+# PRBS
+rg -a -e "arm_prbs.py" mtp_diag.log
 find . -name *$sn*PRBS_MX.log | xargs grep -a -e "elb_chk_ber" -e "MX PRBS"
 find . -name *$sn*PRBS_PCIE.log | xargs grep -a -e "elb_aapl_prbs_check" -e "elb_pcie_srds_prbs" -e "PCIE PRBS"
+
 find . -name *$sn*arm_l1*log | xargs grep -a -A3 -B1 "ARM L1 TESTS STATUS"
 rg -a -e "arm_prbs.py" -e "arm_l1.py" -e "nic_test.py -snake" mtp_diag.log
 rg -a -e "arm_prbs.py" -e "arm_l1.py" -e "nic_test.py -snake" -e "ddr_bist.py" -e "vmarg.sh" mtp_diag.log
-
-rg -a "run_l1.sh" $log_name
 
 # EDMA ==> 10 times
 rg -a "EDMA TEST" $log_name
@@ -70,8 +89,12 @@ img=mainfwb
 rg -a -A34 "$img\":" $log_name | tail -35 | grep -e $img -e "system_image" -e "kernel_fit" -e "uboot" -e software_version
 img=goldfw
 rg -a -A21 "$img\":" $log_name | tail -22 | grep -e $img -e "system_image" -e "kernel_fit" -e "uboot" -e software_version
+rg -a -A150 "fwupdate -l" $log_name | grep -e "boot0" -e "mainfwa" -e "mainfwb" -e "goldfw" -e "diagfw" -e "extdiag" -e "system_image" -e "kernel_fit" -e "uboot" -e "software_version" | tail -29
 
 rg -a -A1 -e "fwupdate -s" -e "fwupdate -r" $log_name
+
+# For Monterey cards only
+rg -a secure_boot_keys $log_name
 
 #=========================
 # FST
