@@ -17,7 +17,18 @@ rg -a "nic_test.py -dis_esec_wp" mtp_diag.log
 rg -a fix_o2_vrm_oc.sh $log_name
 rg -A10 -a "fix_o2_vrm_oc.sh apply" $log_name
 
+# For Ortano2/PCN is pending for approval
+# 0xD3: 0xB7
+# 0xD4: 0x0A
+# For interposer TI/Pomonte
+# 0xD3: 0xB7
+# 0xD4: 0x10
 rg -a -A1 -e i2cget -e i2cset $log_name
+
+# Ortano2/ADI/Interposer: 5
+# Lacona: 18
+# Pomonte: 1
+# Ortano2 MSFT: 8 
 rg -a board_config $log_name
 
 # For Lacona and Pomonte
